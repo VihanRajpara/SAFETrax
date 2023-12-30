@@ -1,0 +1,44 @@
+body {
+    font-family: Verdana, Arial, sans-serif !important;
+  }
+  
+  .header{
+    background-color: #18446B;
+    font-size: 1.1em;
+    font-weight: bolder;
+    color: #eeeeee;
+    text-align: center;
+    padding: 0.3em;
+    text-transform: uppercase;
+    font-family: Verdana, Arial, sans-serif;
+    border-radius: 0.25rem;
+  }
+  
+  .sub-header{
+    background-color: #18446B;
+    color: #eeeeee;
+    font-weight: bold;
+    font-size: small;
+    font-family: sans-serif;
+    padding: 0.3em;
+    text-transform: uppercase;
+    border-radius: 0.25rem;
+  }
+  
+  .btnStyle{
+    font-size: 1em !important ;
+    background: #18446B 50% 50% repeat-x !important;
+    font-weight: normal !important ;
+    color: #e3e3e3 !important ;
+    border-radius: 4px !important ;
+    margin-bottom: 0.3em !important ;
+    margin-right: 20px !important ;
+  }
+  
+  .inputUppercase{
+    text-transform: uppercase;
+  }
+  
+  .text-danger{
+    color: red;
+  }
