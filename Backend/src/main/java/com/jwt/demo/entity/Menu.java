@@ -68,4 +68,11 @@ public class Menu {
 		menu.setMicro_menu(rs.getString("micro_menu"));
 		return menu;
 	};
+
+	@Override
+	public String toString() {
+		return "Menu [menu_id=" + menu_id + ", menu=" + menu + ", small_menu_id=" + small_menu_id + ", small_menu="
+				+ small_menu + ", micro_menu_id=" + micro_menu_id + ", micro_menu=" + micro_menu + "]\n";
+	}
+	
 }
