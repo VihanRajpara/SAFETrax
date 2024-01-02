@@ -131,7 +131,7 @@ export const themeSettings = (mode) => {
             // palette values for dark mode
             primary: {
               // main: colors.primary[500],
-              main:"#18446B",
+              main: "#18446B",
             },
             secondary: {
               main: colors.greenAccent[500],
@@ -148,10 +148,11 @@ export const themeSettings = (mode) => {
         : {
             // palette values for light mode
             primary: {
-              main: colors.primary[100],
+              // main: colors.primary[100],
+              main: "#18446B",
             },
             secondary: {
-              main: colors.greenAccent[500],
+              main: colors.greenAccent[400],
             },
             neutral: {
               dark: colors.grey[700],
@@ -190,6 +191,12 @@ export const themeSettings = (mode) => {
         fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
         fontSize: 14,
       },
+    },
+    button: {
+      fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
+      fontSize: 12,
+      background: "primary",
+      color: "white",
     },
   };
 };

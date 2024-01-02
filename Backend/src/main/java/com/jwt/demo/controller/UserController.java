@@ -40,17 +40,8 @@ public class UserController {
     @Qualifier("hrmsJdbcTemplate")
     private  JdbcTemplate hrmsJdbcTemplate;
 
-    // Get all menus id
-    @GetMapping("/allid")
-    public List<User_SafeTrax> getAllUsers() {
-        StringBuilder sql = new StringBuilder();
-        sql.append("select distinct user_id from accdtl;");
 
-        return jdbcTemplate.query(sql.toString(), User_SafeTrax.rowMapper);
-
-    }
-
-    // Get all menus
+    // Get all Access menu->submenu->micromenu
     @GetMapping("/all")
     public List<Menu> getAllMenu() {
         StringBuilder sql = new StringBuilder();
@@ -78,45 +69,20 @@ public class UserController {
         return jdbcTemplate.query(sqlBuilder.toString(), Menu.rowMapper);
 
     }
-
-    // API for employess master table
-
-    // Get all active employees
-    @GetMapping("/employees")
-    public List<Employee> getEmployees() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("select * from employee_master where status='Active'");
-        return hrmsJdbcTemplate.query(sb.toString(), Employee.rowMapper);
-    }
-
-    // Get single employee by memcode
-    @GetMapping("/employee/{mecode}")
-    public Employee getEmployee(@PathVariable String mecode) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("select * from employee_master where mecode = '").append(mecode).append("'");
-        return jdbcTemplate.queryForObject(sb.toString(), Employee.rowMapper);
-    }
-
-    // Update employee access
+    
+ // Update employee access
     @PostMapping("/update/{id}")
     public ResponseEntity<?> updateMenus(@PathVariable String id, @RequestBody List<Menu> updatedMenus) {
         // Check if the user_id exists in the database
-        String checkUserExistsSql = "SELECT COUNT(*) FROM accdtl WHERE user_id = ?";
-        int userCount = jdbcTemplate.queryForObject(checkUserExistsSql, Integer.class, id);
+    	System.out.println(updatedMenus);
+    	System.out.println("ID is"+id);
 
-        if (userCount == 0) {
-            // If user_id doesn't exist, return an error response
-            return ResponseEntity.badRequest().body(new MessageResponse("Invalid user_id: " + id));
-        }
 
         try {
-            // Backup existing rows for the given user ID to a backup table
-            String backupSql = "INSERT INTO backup_accdtl (user_id, mid, smid, mmid) SELECT user_id, mid, smid, mmid FROM accdtl WHERE user_id = ?";
-            jdbcTemplate.update(backupSql, id);
-
+ 
             // Delete existing rows for the given user ID
             String deleteSql = "DELETE FROM accdtl WHERE user_id = ?";
-            jdbcTemplate.update(deleteSql, id);
+            jdbcTemplate.update(deleteSql, id);  
 
             // Insert new set of menu IDs with the same user_id
             String insertSql = "INSERT INTO accdtl (user_id, mid, smid, mmid) VALUES (?, ?, ?, ?)";
@@ -135,23 +101,39 @@ public class UserController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error updating data"));
         }
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
-    // get data only for insurance department
-    @GetMapping("/insurances")
-    public List<Insurances> getInsurances() {
+    // API for employess master table for investment page
+
+    // Get all active employees  for menu 
+    @GetMapping("/employees")
+    public List<Employee> getEmployees() {
         StringBuilder sb = new StringBuilder();
-        sb.append(
-                "select ac.user_id,ac.mid,m.menu,ac.smid,sm.name as small_menu,ac.mmid,mm.name as micro_menu,mm.project, mm.action,m.menuicon  from accdtl ac \n"
-                        + //
-                        "            \tinner join menu m on (ac.mid=m.menuid) inner join smenu sm on (ac.smid=sm.smenuid and ac.mid=sm.mid) \n"
-                        + //
-                        "            \tinner join micromenu mm on (ac.mmid=mm.mmenuid and ac.mid=mm.menuid and ac.smid=mm.smenuid) \n"
-                        + //
-                        "            \twhere  m.menu='INSURANCE' ");
-        return jdbcTemplate.query(sb.toString(), Insurances.rowMapper);
+        sb.append("select * from employee_master where status='Active'");
+        return hrmsJdbcTemplate.query(sb.toString(), Employee.rowMapper);
     }
 
-    // get all CRO
+    // Get single employee by memcode
+    @GetMapping("/employee/{mecode}")
+    public Employee getEmployee(@PathVariable String mecode) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("select * from employee_master where mecode = '").append(mecode).append("'");
+        return hrmsJdbcTemplate.queryForObject(sb.toString(), Employee.rowMapper);
+    } 
+    
+    // get all CRO -> for investment menu
     @GetMapping("/all-cro")
     public List<Employee> getAllCRO() {
         StringBuilder sb = new StringBuilder();
@@ -159,13 +141,12 @@ public class UserController {
 
         return jdbcTemplate.query(sb.toString(), Employee.rowMapper2);
     }
+    
+    
 
-    // get perticuler CRO for employee
+    // get all investment CRO 's employees 
     @GetMapping("/cro")
     public List<Cro> getCRO() {
-        // You can replace this with the desired CRO code
-
-        String croCode = "F0052";
 
         StringBuilder sqlQuery = new StringBuilder();   
         sqlQuery.append("SELECT e1.Mecode AS Employee_Code, ")
@@ -174,8 +155,8 @@ public class UserController {
                 .append("e2.Mename AS CRO_Name ")
                 .append("FROM employee_master e1 ")
                 .append("INNER JOIN employee_master e2 ON e1.CRO = e2.Mecode ")
-                .append("WHERE e1.DeptCode=4 and e2.DeptCode=1 and e1.CRO = ? and e1.status ='Active'");
-        return jdbcTemplate.query(sqlQuery.toString(), new Object[] { croCode }, Cro.rowMapper);
+                .append("WHERE e1.DeptCode=4 and e2.DeptCode=1 and e1.status ='Active'");
+        return hrmsJdbcTemplate.query(sqlQuery.toString(),  Cro.rowMapper);
     }
 
     @PostMapping("/update-cro/{id}")
@@ -184,7 +165,7 @@ public class UserController {
         System.out.println("Mecode: " + id);
         System.out.println("CRO: " + CRO.CRO());
 
-        int rowsAffected = jdbcTemplate.update(sql, CRO.CRO(), id);
+        int rowsAffected = hrmsJdbcTemplate.update(sql, CRO.CRO(), id);
 
         if (rowsAffected > 0) {
             return ResponseEntity.ok(new MessageResponse("CRO updated successfully for Employee with Mecode: " + id));
@@ -192,15 +173,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new MessageResponse("Employee with Mecode: " + id + " not found or CRO not updated."));
         }
-    }
-
-
-    //HRMS DATA DEMOSTRATION 
-    @GetMapping("/data")
-    public List<Map<String, Object>> getData() {
-        String query = "SELECT * FROM emp_master";
-        List<Map<String, Object>> result = hrmsJdbcTemplate.queryForList(query);
-        return result;
     }
 
 
