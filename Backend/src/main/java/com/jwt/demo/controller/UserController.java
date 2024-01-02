@@ -165,7 +165,7 @@ public class UserController {
     public List<Cro> getCRO() {
         // You can replace this with the desired CRO code
 
-        String croCode = "F0052";
+        // String croCode = "F0052";
 
         StringBuilder sqlQuery = new StringBuilder();   
         sqlQuery.append("SELECT e1.Mecode AS Employee_Code, ")
@@ -174,8 +174,8 @@ public class UserController {
                 .append("e2.Mename AS CRO_Name ")
                 .append("FROM employee_master e1 ")
                 .append("INNER JOIN employee_master e2 ON e1.CRO = e2.Mecode ")
-                .append("WHERE e1.DeptCode=4 and e2.DeptCode=1 and e1.CRO = ? and e1.status ='Active'");
-        return jdbcTemplate.query(sqlQuery.toString(), new Object[] { croCode }, Cro.rowMapper);
+                .append("WHERE e1.DeptCode=4 and e2.DeptCode=1 and e1.status ='Active'");
+        return jdbcTemplate.query(sqlQuery.toString(),  Cro.rowMapper);
     }
 
     @PostMapping("/update-cro/{id}")

@@ -4,6 +4,8 @@ import { tokens } from "../../theme.js";
 import { visuallyHidden } from "@mui/utils";
 import PropTypes from "prop-types";
 import SearchIcon from "@mui/icons-material/Search";
+import { useSnackbar } from "../../snackbar/SnackbarContext";
+
 import {
   Box,
   useTheme,
@@ -26,18 +28,37 @@ import {
 } from "@mui/material";
 import { investmentteam, Leader } from "../DATA.js";
 import TableSortLabel from "@mui/material/TableSortLabel";
-
-function createData(id, Mename, CROname) {
+import axios from "axios";
+let click = 1;// for reflact change while updating cro 
+function useEmployeeData() {
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    const fetchingData = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/user/cro');
+        setData(response.data);
+        console.log(response.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchingData();
+  }, [click]);
+    return   data.map((item, index) => createData(index, item.employee_Name, item.cro_Name,item.employee_Code));;
+}
+function createData(id, employee_Name, employee_CRO,employee_Code) {
   return {
     id,
-    Mename,
-    CROname,
+    employee_Name,
+    employee_CRO,
+    employee_Code
   };
 }
 
-const rows = investmentteam.map((item, index) =>
-  createData(index, item.Mename, item.CROname)
-);
+
+// const rows = investmentteam.map((item, index) =>
+//   createData(index, item.employee_Name, item.employee_CRO)
+// );
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -73,23 +94,35 @@ const headCells = [
     disablePadding: true,
     label: "SR No",
   },
+  // {
+  //   id: "employee_Code",
+  //   numeric: true,
+  //   disablePadding: true,
+  //   label: "employee Code",
+  // },
   {
-    id: "Mename",
+    id: "employee_Name",
     numeric: false,
     disablePadding: false,
     label: "Employee Name",
   },
   {
-    id: "CROname",
+    id: "employee_CRO",
     numeric: false,
     disablePadding: false,
     label: "CRO Name",
   },
 ];
 
+
+
+
+
 function EnhancedTableHead(props) {
+
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: `${colors.blueAccent[600]}`,
@@ -152,20 +185,73 @@ EnhancedTableHead.propTypes = {
 
 function CROforInvestment() {
   const theme = useTheme();
+  const [data, setData] = useState([]);
+  const rows=useEmployeeData();
+  console.log(rows);
   const colors = tokens(theme.palette.mode);
   const header = "Investment CRO ";
   const [user, setuser] = useState({});
-  let CRO = Leader.find((item) => item.Mename === user.CROname);
   const [newCRO, setNewCRO] = useState(null);
   const [order, setOrder] = useState("asc");
-  const [orderBy, setOrderBy] = useState("CROname");
+  const [orderBy, setOrderBy] = useState("employee_CRO");
   const [searchval, setSearchval] = useState("");
+  const [employeeCodeToUpdate, setEmployeeCodeToUpdate] = useState(null);
+  let CRO = data.find((item) => item.mename === user.employee_CRO); 
+  const {fetchingData}=useEmployeeData();
+  
+  
+  const { showSnackbar } = useSnackbar();
+
+ 
+   
+  //data fetching
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/user/all-cro');
+       
+        setData(response.data);
+        console.log("CRO DATA",response.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+  
+  // Function to handle updating the CRO for the selected employee
+const handleUpdate = () => {
+  
+  if (employeeCodeToUpdate && newCRO) {
+    const requestBody = {
+      CRO: newCRO.mecode
+    };
+
+    axios.post(`http://localhost:8080/user/update-cro/${employeeCodeToUpdate}`, requestBody)
+      .then((response) => {
+        // console.log(CRO)
+        console.log("Update successful:", response.data);
+        showSnackbar("CRO Updated successfully","success")
+        handleClose();
+        click=click+1;
+      })
+      .catch((error) => {
+        console.error("Error updating CRO:", error);
+      });
+  } else {
+    console.error("Invalid employee code or new CRO value");
+  }
+};
+
+
   const [filterFn, setFilterFn] = useState({
     fn: (items) => {
       return items;
     },
   });
   const [open, setOpen] = useState(false);
+
 
   const handleSearch = (e) => {
     setSearchval(e.target.value);
@@ -175,8 +261,8 @@ function CROforInvestment() {
         if (target.value == "") return items;
         else
           return items.filter((x) =>
-            x.Mename.toLowerCase().includes(target.value.toLowerCase()) ||
-            x.CROname.toLowerCase().includes(target.value.toLowerCase())
+            x.employee_Name.toLowerCase().includes(target.value.toLowerCase()) ||
+            x.employee_CRO.toLowerCase().includes(target.value.toLowerCase())
           );
       },
     });
@@ -185,6 +271,7 @@ function CROforInvestment() {
   const handleOpen = (person) => {
     if (person !== user) {
       setuser(person);
+      setEmployeeCodeToUpdate(person.employee_Code);
     }
     setOpen(true);
   };
@@ -198,10 +285,13 @@ function CROforInvestment() {
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
-  useEffect(() => { }, [searchval]);
+  
+  useEffect(() => {
+       
+   }, [searchval]);
   let visibleRows = useMemo(
     () => stableSort(filterFn.fn(rows), getComparator(order, orderBy)),
-    [order, orderBy, searchval]
+    [order, orderBy, searchval,rows]
   );
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -237,6 +327,7 @@ function CROforInvestment() {
     p: 4,
     borderRadius: 3,
   };
+
 
 
   return (
@@ -281,27 +372,27 @@ function CROforInvestment() {
                     }}
                     id="Read Only"
                     label="Employee Name"
-                    value={user.Mename}
+                    value={user.employee_Name}
                   />
                 </Box>
                 <Box>
                   <Autocomplete
                     disablePortal
                     id="combo-box-demo"
-                    options={Leader}
+                    options={data}
                     value={CRO}
                     onChange={(event, newValue) => {
                       setNewCRO(newValue);
                       console.log(newValue);
                     }}
                     sx={{ width: 350, height: 20, marginBottom: 4 }}
-                    getOptionLabel={(option) => option.Mename}
+                    getOptionLabel={(option) => option.mename}
                     renderInput={(params) => (
                       <TextField {...params} label="CRO" />
                     )}
                     renderOption={(props, option) => (
                       <li {...props}>
-                        <Typography>{`${option.Mename}`}</Typography>
+                        <Typography>{`${option.mename}`}</Typography>
                       </li>
                     )}
                   />
@@ -310,6 +401,7 @@ function CROforInvestment() {
                   <Button
                     variant="contained"
                     sx={{ background: `${colors.blueAccent[600]}` }}
+                    onClick={handleUpdate}
                   >
                     Update
                   </Button>
@@ -375,11 +467,14 @@ function CROforInvestment() {
                       <StyledTableCell align="center">
                         {row.id + 1}
                       </StyledTableCell>
+                      {/* <StyledTableCell align="left">
+                        {row.employee_Code}
+                      </StyledTableCell> */}
                       <StyledTableCell align="left">
-                        {row.Mename}
+                        {row.employee_Name}
                       </StyledTableCell>
                       <StyledTableCell align="left">
-                        {row.CROname}
+                        {row.employee_CRO}
                       </StyledTableCell>
                       <StyledTableCell align="center">
                         <Button

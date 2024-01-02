@@ -9,17 +9,56 @@ import {
 } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import VisibilityOffIcon from "@mui/icons-material/Visibility";
+import axios from "axios";
+import { useSnackbar } from "../../snackbar/SnackbarContext";
+import { useNavigate } from "react-router-dom";
 
-function NewPasswoed({ changeBox, setPassword, password }) {
+
+function NewPassword({ changeBox, email }) {
   const theme = useTheme();
-  const [cnfpassword, setCnfpassword] = useState();
+  const navigate = useNavigate();
+  const { showSnackbar } = useSnackbar();
+
+  const [password, setPassword] = useState("");
+  const [cnfpassword, setCnfpassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleTogglePasswordVisibility = () => {
     setShowPassword((prevShowPassword) => !prevShowPassword);
   };
 
+  const handleSubmit = async () => {
+    if (password !== cnfpassword) {
+      showSnackbar("Passwords do not match", "error");
+      return;
+    }
+  
+    try {
+  
+      const url = `http://localhost:8080/auth/set-password?email=${email}`;
+      const requestBody = {
+        newPassword: password,
+      };
+  
+      const response = await axios.put(url, null, {
+        headers: {
+          "newPassword": password,
+        },
+      });
+  
+      if (response.status === 200) {
+        console.log("Password successfully Changed");
+        showSnackbar("Password successfully Changed", "success");
+        navigate("/login");
+      } else {
+        console.error("Error setting password");
+      }
+    } catch (error) {
+      console.error("Axios error:", error);
+    }
+  };
+  
   return (
     <Box
       width="100%"
@@ -31,7 +70,7 @@ function NewPasswoed({ changeBox, setPassword, password }) {
       component="form"
     >
       <Typography variant={"h4"} style={{ marginBottom: "10px" }}>
-        Enter the required innformation.
+        Enter the required information.
       </Typography>
 
       <Box width="100%" textAlign="left">
@@ -49,10 +88,7 @@ function NewPasswoed({ changeBox, setPassword, password }) {
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton
-                  onClick={handleTogglePasswordVisibility}
-                  edge="start"
-                >
+                <IconButton onClick={handleTogglePasswordVisibility} edge="start">
                   {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                 </IconButton>
               </InputAdornment>
@@ -85,7 +121,7 @@ function NewPasswoed({ changeBox, setPassword, password }) {
           width: "100%",
           height: "100%",
         }}
-        onClick={() => changeBox("email")}
+        onClick={handleSubmit}
       >
         Change Password
       </Button>
@@ -93,4 +129,4 @@ function NewPasswoed({ changeBox, setPassword, password }) {
   );
 }
 
-export default NewPasswoed;
+export default NewPassword;

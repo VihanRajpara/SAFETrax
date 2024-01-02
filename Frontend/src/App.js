@@ -7,12 +7,16 @@ import NotFoundPage from "./pages/NotFoundPage";
 import Useraccess from "./pages/Useraccess";
 import CROTab from "./pages/CROTab.jsx";
 import "./App.css";
+import { SnackbarProvider } from "./snackbar/SnackbarContext.jsx";
+import Otpforpassword from "./components/Login/Otpforpassword";
+import DashBoard from "./pages/DashBoard.jsx";
 function App() {
   const [theme, colorMode] = useMode();
 
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
+        <SnackbarProvider>
         <CssBaseline />
         <div className="app">
           <main className="content">
@@ -22,9 +26,12 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword/>}/>
               <Route path="/cro" element={<CROTab/>}/>
               <Route path="/*" element={<NotFoundPage />} />
+              <Route path="/dashboard" element={<DashBoard />} />
+              
             </Routes>
           </main>
         </div>
+        </SnackbarProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>
   );

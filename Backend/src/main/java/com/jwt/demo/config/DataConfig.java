@@ -16,11 +16,13 @@ public class DataConfig {
 
     @Primary
     @Bean(name = "accessDataSource")
-    public DataSource accessDataSource(){
+    public DataSource accessDataSource() {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://localhost:3306/acldb");
+        // config.setJdbcUrl("jdbc:mysql://localhost:3306/acldb");
+        config.setJdbcUrl("jdbc:mysql://localhost:3306/access");
         config.setUsername("root");
-        config.setPassword("vihan");
+        // config.setPassword("vihan");
+        config.setPassword("ajay1234");
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
         return new HikariDataSource(config);
     }
@@ -36,7 +38,8 @@ public class DataConfig {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl("jdbc:mysql://localhost:3306/hrms");
         config.setUsername("root");
-        config.setPassword("vihan");
+        // config.setPassword("vihan");
+        config.setPassword("ajay1234");
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
 
         return new HikariDataSource(config);

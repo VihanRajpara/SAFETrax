@@ -72,7 +72,7 @@ function ForgotPassword() {
               </Typography>
             </Box>
 
-            {Emailbox && <EmailValidator changeBox={change} setEmail={setEmail} email={email}/>}
+            {Emailbox && <EmailValidator changeBox={change} setEmail={setEmail} email={email} setOtp={setOtp}/>}
             {Otpbox && <Otpforpassword changeBox={change} setOtp={setOtp} otp={otp} email={email}/>}
             {Newpassbox && <NewPasswoed changeBox={change} setPassword={setPassword} password={password}/>}
           </Box>

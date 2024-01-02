@@ -40,8 +40,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/auth")
-
-
+@CrossOrigin("http://localhost:3000")
 public class AuthController {
 
     @Autowired
@@ -125,6 +124,7 @@ public class AuthController {
 
     @PutMapping("/set-password")
     public ResponseEntity<?> setPassword(@RequestParam String email, @RequestHeader String newPassword) {
+        System.out.println(newPassword);
         return new ResponseEntity<>(userService.setPassword(email, newPassword), HttpStatus.OK);
     }
 

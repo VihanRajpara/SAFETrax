@@ -24,18 +24,45 @@ import {
   TableSortLabel,
 } from "@mui/material";
 import { investmentteam, Leader } from "../DATA.js";
+import axios from "axios";
 
-function createData(id, Mename, CROname) {
+function useEmployeeData() {
+  const [data, setData] = useState([]);
+  const [rows, setRows] = useState([]);
+
+  useEffect(() => {
+    const fetchingData = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/user/employees');
+        setData(response.data);
+        console.log(response.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchingData();
+  }, []);
+
+  return data.map((item, index) => createData(index, item.mename, item.cro, item.mecode));
+
+  
+}
+
+function createData(id, mename, cro,mecode) {
   return {
     id,
-    Mename,
-    CROname,
+    mename,
+    cro,
+    mecode
   };
 }
 
-const rows = investmentteam.map((item, index) =>
-  createData(index, item.Mename, item.CROname)
-);
+
+
+// const rows = data.map((item, index) =>
+//   createData(index, item.mename, item.cro)
+// );
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -72,7 +99,7 @@ const headCells = [
     label: "SR No",
   },
   {
-    id: "Mename",
+    id: "mename",
     numeric: false,
     disablePadding: false,
     label: "Employee Name",
@@ -201,6 +228,7 @@ EnhancedTableToolbar.propTypes = {
 function CROforInsurance() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const rows=useEmployeeData();
   const header = "Insurance CRO ";
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("id");
@@ -252,7 +280,7 @@ function CROforInsurance() {
         else
           return items.filter(
             (x) =>
-              x.Mename.toLowerCase().includes(target.value.toLowerCase())
+              x.mename.toLowerCase().includes(target.value.toLowerCase())
           );
       },
     });
@@ -266,7 +294,7 @@ function CROforInsurance() {
 
   let visibleRows = useMemo(
     () => stableSort(filterFn.fn(rows), getComparator(order, orderBy)),
-    [order, orderBy, searchval]
+    [order, orderBy, searchval,rows]
   );
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -396,7 +424,7 @@ function CROforInsurance() {
                         scope="row"
                         align="left"
                       >
-                        {row.Mename}
+                        {row.mename}
                       </StyledTableCell>
                     </StyledTableRow>
                   );
