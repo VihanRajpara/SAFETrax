@@ -137,9 +137,9 @@ public class UserController {
     @GetMapping("/all-cro")
     public List<Employee> getAllCRO() {
         StringBuilder sb = new StringBuilder();
-        sb.append("SELECT Mecode, Mename FROM access.employee_master WHERE DeptCode = 1 AND Status = 'Active';");
+        sb.append("SELECT Mecode, Mename FROM employee_master WHERE DeptCode = 1 AND Status = 'Active';");
 
-        return jdbcTemplate.query(sb.toString(), Employee.rowMapper2);
+        return hrmsJdbcTemplate.query(sb.toString(), Employee.rowMapper2);
     }
     
     
@@ -161,7 +161,7 @@ public class UserController {
 
     @PostMapping("/update-cro/{id}")
     public ResponseEntity<?> updateCRO(@PathVariable String id, @RequestBody CroUpdateRequest CRO) {
-        String sql = "UPDATE access.employee_master SET CRO = ? WHERE Mecode = ?";
+        String sql = "UPDATE employee_master SET CRO = ? WHERE Mecode = ?";
         System.out.println("Mecode: " + id);
         System.out.println("CRO: " + CRO.CRO());
 
