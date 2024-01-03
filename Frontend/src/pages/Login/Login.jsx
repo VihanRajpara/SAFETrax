@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Paper,
@@ -8,24 +8,61 @@ import {
   Button,
   Typography,
   Grid,
+  Snackbar,
+  SnackbarContent,
 } from "@mui/material";
-import { useState } from "react";
 import PersonIcon from "@mui/icons-material/Person";
 import InputAdornment from "@mui/material/InputAdornment";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 import companylogo from "../../assets/safe-invest-logo.png";
 import loginlogo from "../../assets/LoginLogo1.png";
+import { useSnackbar } from "../../snackbar/SnackbarContext";
 
 function Login() {
+  
   const theme = useTheme();
+  const { showSnackbar } = useSnackbar();
+
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
 
   const handleTogglePasswordVisibility = () => {
     setShowPassword((prevShowPassword) => !prevShowPassword);
   };
+
+  const handleLogin = () => {
+    const apiUrl = 'http://localhost:8080/auth/login';
+
+    axios
+      .post(apiUrl, {
+        email: email.trim(),
+        password: password.trim(),
+      })
+      .then((response) => {
+        console.log('API Response:', response.data);
+        localStorage.setItem('jwtToken', response.data.jwttoken);
+        if (response.data.jwttoken!=null) {
+          navigate('/dashboard');
+          showSnackbar("Successfully authenticated","success")
+        }
+        // Redirect to the /useraccess route upon successful login
+       
+      })
+      .catch((error) => {
+        console.error('Error during login:', error);
+        // Display Snackbar with error message
+        showSnackbar(error.response.data.message, "error");
+        
+      });
+  };
+
 
   return (
     <>
@@ -46,7 +83,6 @@ function Login() {
             backgroundColor: theme.palette.mode === "dark" ? "#141b2d" : "",
           }}
         >
-          
           <Grid container>
             <Grid item xs={12} md={5} lg={4} xl={5}>
               <Box
@@ -85,6 +121,7 @@ function Login() {
                       marginBottom: "15px",
                       borderRadius: "7px",
                     }}
+                    alt="Login Logo"
                   />
                 </Box>
               </Box>
@@ -103,10 +140,10 @@ function Login() {
                   <b>ॐ श्री गणेशाय नमः</b>
                 </Typography>
                 <Box width="100%">
-                  <Typography variant={"h6"}>Username :</Typography>
+                  <Typography variant={"h6"}>Email :</Typography>
                   <TextField
                     required
-                    id="username"
+                    id="email"
                     placeholder="User Name"
                     variant="outlined"
                     sx={{ width: "100%" }}
@@ -117,6 +154,8 @@ function Login() {
                         </InputAdornment>
                       ),
                     }}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </Box>
                 <Box width="100%">
@@ -126,7 +165,7 @@ function Login() {
                     id="password"
                     placeholder="Password"
                     autoComplete="off"
-                    type={showPassword ? "text" : "Password"}
+                    type={showPassword ? "text" : "password"}
                     variant="outlined"
                     sx={{ width: "100%" }}
                     InputProps={{
@@ -145,6 +184,8 @@ function Login() {
                         </InputAdornment>
                       ),
                     }}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                 </Box>
                 <Typography
@@ -171,10 +212,10 @@ function Login() {
                     width: "100%",
                     height: "100%",
                   }}
+                  onClick={handleLogin}
                 >
-                  login
+                  Login
                 </Button>
-                
               </Box>
             </Grid>
           </Grid>
