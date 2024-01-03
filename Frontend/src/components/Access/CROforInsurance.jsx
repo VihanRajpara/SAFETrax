@@ -9,7 +9,7 @@ import {
   Checkbox,
   useTheme,
   Paper,
-  styled,
+  styled,Autocomplete,Button,
   Table,
   Typography,
   Toolbar,
@@ -43,6 +43,8 @@ function useEmployeeData() {
 
     fetchingData();
   }, []);
+
+ 
 
   return data.map((item, index) => createData(index, item.mename, item.cro, item.mecode));
 
@@ -143,7 +145,7 @@ function EnhancedTableHead(props) {
   return (
     <TableHead>
       <TableRow>
-        <StyledTableCell padding="checkbox">
+        <StyledTableCell padding="checkbox" align="center">
           <Checkbox
             color="primary"
             indeterminate={numSelected > 0 && numSelected < rowCount}
@@ -151,6 +153,12 @@ function EnhancedTableHead(props) {
             onChange={onSelectAllClick}
             inputProps={{
               "aria-label": "select all desserts",
+            }}
+            sx={{
+              color: "white !important",
+              '&.Mui-checked': {
+                color: "white !important",
+              },
             }}
           />
         </StyledTableCell>
@@ -234,15 +242,34 @@ function CROforInsurance() {
   const [orderBy, setOrderBy] = useState("id");
   const [selected, setSelected] = useState([]);
   const [searchval, setSearchval] = useState("");
+  const [user, setUser]=useState(null);
+  const [CROS,setCROS] = useState([]);
   const [filterFn, setFilterFn] = useState({
     fn: (items) => {
       return items;
     },
   });
+
+  useEffect(() => {
+    const fetchingData = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/user/insurance/all-cro');
+        // setData(response.data);
+        console.log("/insurance/all-cro",response.data);
+        setCROS(response.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchingData();
+  }, []);
+
   console.log("Select", selected)
+
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = rows.map((n) => n.id);
+      const newSelected = rows.map((n) => n.mecode);
       setSelected(newSelected);
       console.log("new ", newSelected, "Alredy", isSelected)
       return;
@@ -342,9 +369,49 @@ function CROforInsurance() {
           justifyContent="center"
           alignItems="center"
         >
+          <Box
+          display="flex"
+          gap={2}
+          p={2}
+          flexDirection="row"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Typography sx={{ fontSize: 18 }}>select CRO : </Typography>
+          <Box
+            display="flex"
+            sx={{ width: 400, height: 36 }}
+            backgroundColor={colors.primary[400]}
+            borderRadius="1px"
+          >
+            <Autocomplete
+              size="small"
+              disablePortal
+              id="combo-box-demo"
+              options={CROS}
+              value={user}
+              onChange={(e, v) => setUser(v)}
+              sx={{ width: 400, height: 20 }}
+              getOptionLabel={(option) => option.mename}
+              renderInput={(params) => <TextField {...params} label="CRO" />}
+              renderOption={(props, option) => (
+                <li {...props}>
+                  <Typography>{`${option.mename}`}</Typography>
+                </li>
+              )}
+            />
+          </Box>
+          <Button
+            variant="contained"
+            sx={{ borderRadius: 4 ,bgcolor: `${colors.blueAccent[600]}`}}
+            onClick={() => console.log("user", user)}
+          >
+            GO
+          </Button>
+        </Box>
           <TableContainer
             component={Paper}
-            sx={{ margin: 2, maxWidth: "100%", borderRadius: 2 }}
+            sx={{ margin: 2, maxWidth: "70%", borderRadius: 2 }}
           >
             <Box display="flex" justifyContent="space-between" sx={{ background: `${colors.blueAccent[600]}` }}>
               <Toolbar >
@@ -393,12 +460,12 @@ function CROforInsurance() {
               />
               <TableBody>
                 {visibleRows.map((row, index) => {
-                  const isItemSelected = isSelected(row.id);
+                  const isItemSelected = isSelected(row.mecode);
                   const labelId = `enhanced-table-checkbox-${index}`;
                   return (
                     <StyledTableRow
                       hover
-                      onClick={(event) => handleClick(event, row.id)}
+                      onClick={(event) => handleClick(event, row.mecode)}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}

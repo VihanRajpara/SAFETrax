@@ -109,19 +109,14 @@ public class UserController {
     
     
     
-    
-    
-    
-    
-    
 
-    // API for employess master table for investment page
+    // API for employess master table for insu page
 
     // Get all active employees  for menu 
     @GetMapping("/employees")
     public List<Employee> getEmployees() {
         StringBuilder sb = new StringBuilder();
-        sb.append("select * from employee_master where status='Active'");
+        sb.append("select * from employee_master where DeptCode = 4 and status='Active'");
         return hrmsJdbcTemplate.query(sb.toString(), Employee.rowMapper);
     }
 
@@ -142,10 +137,16 @@ public class UserController {
         return hrmsJdbcTemplate.query(sb.toString(), Employee.rowMapper2);
     }
     
-    
+    @GetMapping("/insurance/all-cro")
+    public List<Employee> getINSURANCEAllCRO() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT Mecode, Mename FROM employee_master WHERE DeptCode = 2 AND Status = 'Active';");
 
+        return hrmsJdbcTemplate.query(sb.toString(), Employee.rowMapper2);
+    }
+    
     // get all investment CRO 's employees 
-    @GetMapping("/cro")
+    @GetMapping("/rm")
     public List<Cro> getCRO() {
 
         StringBuilder sqlQuery = new StringBuilder();   
