@@ -40,7 +40,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/auth")
-
+@CrossOrigin("http://localhost:3000")
 
 public class AuthController {
 
@@ -61,6 +61,8 @@ public class AuthController {
 
     @Autowired
     UserDAO userDAO;
+    
+    public record forgotbody (String email, String password) {}
 
     // private Logger logger = LoggerFactory.getLogger(AuthController.class);
 

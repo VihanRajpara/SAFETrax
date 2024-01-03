@@ -104,6 +104,7 @@ public class UserService {
 	}
 
 	public ResponseEntity<String> setPassword(String email, String newPassword) {
+		System.out.print(email);
 		try {
 			User user = userDAO.findByEmail(email)
 					.orElseThrow(() -> new RuntimeException("User not found with email " + email));
